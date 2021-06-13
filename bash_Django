@@ -1,0 +1,65 @@
+#! /usr/bin/bash
+
+echo "Hello $(whoami)"
+echo "Welcome to the Django build tool\n"
+
+# Building Virtual Environment
+echo "Building virtual environment..."
+python3 -m venv venv
+source venv/bin/activate
+pip install django
+
+# Creating Project
+echo "Enter Project Name:"
+read projectName
+echo "Building $projectName"
+django-admin startproject $projectName
+
+# Creating App
+echo "Enter app name for $projectName"
+read appName
+django-admin startapp $appName
+sed -i "/'django.contrib.staticfiles',/ s/^\(.*\)\(\)/\1\n    '$appName',\2/" ./$projectName/$projectName/settings.py
+echo "App $appname registered"
+
+# Creating Imports
+sed -i "/from pathlib import Path/ s/^\(.*\)\(\)/\1\nimport os\2/" ./$projectName/$projectName/settings.py
+sed -i "/from django.urls import path/ s/^\(.*\)\(\)/\1,include\2/" ./$projectName/$projectName/urls.py
+sed -i "/from django.contrib import admin/ s/^\(.*\)\(\)/\1\nfrom .models import Project,Member,Service,Timeline\2/" ./$appName/admin.py
+
+# Adding Models
+sed -i "/here./ s/^\(.*\)\(\)/\1\nadmin.site.register(Member)\2/" ./$appName/admin.py
+sed -i "/here./ s/^\(.*\)\(\)/\1\nadmin.site.register(Project)\2/" ./$appName/admin.py
+sed -i "/here./ s/^\(.*\)\(\)/\1\nadmin.site.register(Service)\2/" ./$appName/admin.py
+sed -i "/here./ s/^\(.*\)\(\)/\1\nadmin.site.register(Timeline)\2/" ./$appName/admin.py
+
+# Pushing default file contents
+cat ./defaults/default_model >> ./$appName/models.py
+cat ./defaults/default_urls >> ./$appName/urls.py
+cat ./defaults/default_view >> ./$appName/views.py
+cat ./defaults/settings >> ./$projectName/$projectName/settings.py
+
+# Setting up urls
+sed -i "/urls),/ s/^\(.*\)\(\)/\1\n    path('', include('$appName.urls')),\2/" ./$projectName/$projectName/urls.py
+
+# Adding template directory pointer
+sed -i "/DIRS':/ s/^\(.*\)\(]\)/\1str(BASE_DIR.joinpath('templates'))\2/" ./$projectName/$projectName/settings.py
+
+# Copying default files
+cp -r ./defaults/templates ./$projectName
+cp -r ./defaults/static ./$projectName
+
+# Moving app into project
+mv ./$appName ./$projectName
+
+source venv/bin/activate
+
+cd $projectName
+
+# Registering Models
+python3 manage.py makemigrations
+python3 manage.py migrate
+python3 manage.py createsuperuser
+
+# Running Server
+python3 manage.py runserver
