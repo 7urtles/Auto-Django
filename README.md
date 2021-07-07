@@ -12,4 +12,5 @@ This guide assumes you already have basic Django knowledge
 
 Comes with example model, template, urls, and the static files are pre-linked.
 
-Follow this up with 
+If you would like to deploy publicly check out the below repository:
+https://github.com/chparmley/Nginx-Django-Deployment
