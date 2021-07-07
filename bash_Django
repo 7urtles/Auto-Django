@@ -1,7 +1,7 @@
 #! /usr/bin/bash
 
 echo "Hello $(whoami)"
-echo "Welcome to the Django build tool\n"
+echo "Welcome to the Django build tool"
 
 # Building Virtual Environment
 echo "Building virtual environment..."
