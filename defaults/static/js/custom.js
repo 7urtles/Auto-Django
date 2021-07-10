@@ -1,88 +1,145 @@
-(function ($) {
-
+/*global jQuery:false */
+jQuery(document).ready(function ($) {
   "use strict";
 
-    // PRE LOADER
-    $(window).load(function(){
-      $('.preloader').fadeOut(1000); // set duration in brackets    
-    });
+  (function () {
 
+    var $menu = $('.navigation nav'),
+      optionsList = '<option value="" selected>Go to..</option>';
 
-    // MENU
-    $('.navbar-collapse a').on('click',function(){
-      $(".navbar-collapse").collapse('hide');
-    });
+    $menu.find('li').each(function () {
+        var $this = $(this),
+          $anchor = $this.children('a'),
+          depth = $this.parents('ul').length - 1,
+          indent = '';
 
-    $(window).scroll(function() {
-      if ($(".navbar").offset().top > 50) {
-        $(".navbar-fixed-top").addClass("top-nav-collapse");
-          } else {
-            $(".navbar-fixed-top").removeClass("top-nav-collapse");
+        if (depth) {
+          while (depth > 0) {
+            indent += ' - ';
+            depth--;
           }
+        }
+
+        $(".nav li").parent().addClass("bold");
+        optionsList += '<option value="' + $anchor.attr('href') + '">' + indent + ' ' + $anchor.text() + '</option>';
+      }).end()
+      .after('<select class="selectmenu">' + optionsList + '</select>');
+
+    $('select.selectmenu').on('change', function () {
+      window.location = $(this).val();
     });
 
+  })();
 
-    // HOME SLIDER & COURSES & CLIENTS
-    $('.home-slider').owlCarousel({
-      animateOut: 'fadeOut',
-      items:1,
-      loop:true,
-      dots:false,
-      autoplayHoverPause: false,
-      autoplay: true,
-      smartSpeed: 1000,
-    })
+  //Navi hover
+  $('ul.nav li.dropdown').hover(function () {
+    $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeIn();
+  }, function () {
+    $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeOut();
+  });
 
-    $('.owl-courses').owlCarousel({
-      animateOut: 'fadeOut',
-      loop: true,
-      autoplayHoverPause: false,
-      autoplay: true,
-      smartSpeed: 1000,
-      dots: false,
-      nav:true,
-      navText: [
-          '<i class="fa fa-angle-left"></i>',
-          '<i class="fa fa-angle-right"></i>'
-      ],
-      responsiveClass: true,
-      responsive: {
-        0: {
-          items: 1,
-        },
-        1000: {
-          items: 3,
-        }
+  //add some elements with animate effect
+
+  var iOS = false,
+    p = navigator.platform;
+
+  if (p === 'iPad' || p === 'iPhone' || p === 'iPod') {
+    iOS = true;
+  }
+
+  if (iOS === false) {
+
+    $('.flyIn').bind('inview', function (event, visible) {
+      if (visible === true) {
+        $(this).addClass('animated fadeInUp');
       }
     });
 
-    $('.owl-client').owlCarousel({
-      animateOut: 'fadeOut',
-      loop: true,
-      autoplayHoverPause: false,
-      autoplay: true,
-      smartSpeed: 1000,
-      responsiveClass: true,
-      responsive: {
-        0: {
-          items: 1,
-        },
-        1000: {
-          items: 3,
-        }
+    $('.flyLeft').bind('inview', function (event, visible) {
+      if (visible === true) {
+        $(this).addClass('animated fadeInLeftBig');
       }
     });
 
+    $('.flyRight').bind('inview', function (event, visible) {
+      if (visible === true) {
+        $(this).addClass('animated fadeInRightBig');
+      }
+    });
 
-    // SMOOTHSCROLL
-    $(function() {
-      $('.custom-navbar a, #home a').on('click', function(event) {
-        var $anchor = $(this);
-          $('html, body').stop().animate({
-            scrollTop: $($anchor.attr('href')).offset().top - 49
-          }, 1000);
-            event.preventDefault();
-      });
-    });  
+  }
 
-})(jQuery);
+  $(".box").hover(
+    function () {
+      $(this).find('.ico').addClass("animated rotateIn");
+      $(this).find('h4').addClass("animated fadeInUp");
+    },
+    function () {
+      $(this).find('.ico').removeClass("animated rotateIn");
+      $(this).find('h4').removeClass("animated fadeInUp");
+    }
+  );
+
+  $('.accordion').on('show', function (e) {
+
+    $(e.target).prev('.accordion-heading').find('.accordion-toggle').addClass('active');
+    $(e.target).prev('.accordion-heading').find('.accordion-toggle i').removeClass('icon-plus');
+    $(e.target).prev('.accordion-heading').find('.accordion-toggle i').addClass('icon-minus');
+  });
+
+  $('.accordion').on('hide', function (e) {
+    $(this).find('.accordion-toggle').not($(e.target)).removeClass('active');
+    $(this).find('.accordion-toggle i').not($(e.target)).removeClass('icon-minus');
+    $(this).find('.accordion-toggle i').not($(e.target)).addClass('icon-plus');
+  });
+
+  // testimonial
+  var TestiSlide = $('.bxslider');
+  TestiSlide.bxSlider({
+    auto: true,
+    pager: false,
+    controls: false,
+    useCSS: false,
+    speed: 2000,
+    easing: 'easeOutElastic',
+    mode: 'horizontal',
+    controlDirections: true
+  });
+
+  //prettyphoto
+  $("a[data-pretty^='prettyPhoto']").prettyPhoto({
+    social_tools: ''
+  });
+
+  // tooltip
+  $('.social-network li a, .options_box .color a').tooltip();
+
+  //scroll to top
+  $(window).scroll(function () {
+    if ($(this).scrollTop() > 100) {
+      $('.scrollup').fadeIn();
+
+    } else {
+      $('.scrollup').fadeOut();
+
+    }
+  });
+
+  $('.scrollup').click(function () {
+    $("html, body").animate({
+      scrollTop: 0
+    }, 1000);
+    return false;
+  });
+
+  //flexslider
+  $('.flexslider').flexslider({
+    animation: "fade",
+    directionNav: true,
+    controlNav: false,
+    pauseOnAction: true,
+    pauseOnHover: true,
+    slideshowSpeed: 5500
+  });
+
+});
